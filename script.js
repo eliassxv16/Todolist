@@ -285,12 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const mainContent = document.createElement('div');
         mainContent.className = 'task-main-content';
 
-        // Priority badge
-        const priorityBadge = document.createElement('span');
-        priorityBadge.className = `priority-badge priority-${task.priority}`;
-        const priorityIcons = { high: '🔴', medium: '🟡', low: '🟢' };
-        priorityBadge.textContent = priorityIcons[task.priority];
-
         // Category badge
         const categoryBadge = document.createElement('span');
         categoryBadge.className = `insignia-categoria categoria-${task.category}`;
@@ -351,7 +345,6 @@ document.addEventListener('DOMContentLoaded', () => {
             mainContent.appendChild(subtaskSpan);
         }
 
-        mainContent.appendChild(priorityBadge);
         mainContent.appendChild(categoryBadge);
         mainContent.appendChild(dueDateSpan);
         mainContent.appendChild(taskText);

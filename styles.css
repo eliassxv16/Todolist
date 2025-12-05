@@ -494,26 +494,6 @@ h1 {
     flex-wrap: wrap;
 }
 
-.priority-badge {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    align-self: center;
-}
-
-.priority-high {
-    background: var(--danger);
-}
-
-.priority-medium {
-    background: var(--warning);
-}
-
-.priority-low {
-    background: var(--success);
-}
-
 .insignia-categoria {
     padding: 4px 12px;
     border-radius: 12px;
