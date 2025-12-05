@@ -763,9 +763,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     exportCsvBtn?.addEventListener('click', () => {
-        let csv = 'Tarea,Categoría,Prioridad,Fecha,Completada,Etiquetas\n';
+        // UTF-8 BOM para que Excel reconozca los acentos
+        const BOM = '\uFEFF';
+        let csv = BOM + 'Tarea;Categoría;Prioridad;Fecha;Completada;Etiquetas\n';
         tasks.forEach(task => {
-            csv += `"${task.text}","${task.category}","${task.priority}","${task.dueDate || ''}","${task.completed}","${task.tags?.join(';') || ''}"\n`;
+            csv += `"${task.text}";"${task.category}";"${task.priority}";"${task.dueDate || ''}";"${task.completed}";"${task.tags?.join('|') || ''}"\n`;
         });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
