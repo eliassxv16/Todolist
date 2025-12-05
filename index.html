@@ -3,34 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista ToDo</title>
+    <title>Lista ToDo Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="contenedor">
+        <!-- Header -->
         <div class="encabezado">
-            <h1>To-Do</h1>
-            <button id="alternador-oscuro" class="btn-alternador">🌙</button>
+            <h1>✨ To-Do Pro</h1>
+            <div class="header-controls">
+                <button id="stats-toggle" class="btn-icon" title="Estadísticas">📊</button>
+                <button id="calendar-toggle" class="btn-icon" title="Calendario">📅</button>
+                <button id="settings-toggle" class="btn-icon" title="Configuración">⚙️</button>
+                <button id="alternador-oscuro" class="btn-alternador">🌙</button>
+            </div>
         </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="🔍 Buscar tareas...">
+            <button id="clear-search" class="btn-clear">✕</button>
+        </div>
+
+        <!-- Statistics Dashboard (Hidden by default) -->
+        <div id="stats-dashboard" class="stats-dashboard hidden">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-today">0</div>
+                    <div class="stat-label">Hoy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-week">0</div>
+                    <div class="stat-label">Esta Semana</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-streak">🔥 0</div>
+                    <div class="stat-label">Racha</div>
+                </div>
+            </div>
+            <div class="category-breakdown">
+                <canvas id="category-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Pomodoro Timer -->
+        <div id="pomodoro-panel" class="pomodoro-panel hidden">
+            <div class="pomodoro-display">
+                <div class="timer-circle">
+                    <span id="timer-display">25:00</span>
+                </div>
+            </div>
+            <div class="pomodoro-controls">
+                <button id="timer-start" class="btn-timer">▶️ Iniciar</button>
+                <button id="timer-pause" class="btn-timer hidden">⏸️ Pausar</button>
+                <button id="timer-reset" class="btn-timer">🔄 Reiniciar</button>
+            </div>
+            <div class="pomodoro-sessions">
+                <span id="session-count">Sesiones: 0</span>
+            </div>
+        </div>
+
+        <!-- Task Input -->
         <div class="contenedor-entrada">
             <input type="text" id="entrada-tarea" placeholder="Agregar una nueva tarea...">
+            <select id="selector-prioridad" title="Prioridad">
+                <option value="low">🟢 Baja</option>
+                <option value="medium" selected>🟡 Media</option>
+                <option value="high">🔴 Alta</option>
+            </select>
             <select id="selector-categoria">
                 <option value="personal">Personal</option>
                 <option value="trabajo">Trabajo</option>
                 <option value="urgente">Urgente</option>
             </select>
             <input type="date" id="entrada-fecha-vencimiento">
-            <button id="btn-agregar">Agregar</button>
+            <button id="btn-agregar">➕ Agregar</button>
         </div>
+
+        <!-- Tags Input -->
+        <div class="tags-container">
+            <input type="text" id="tags-input" placeholder="🏷️ Agregar etiquetas (separadas por coma)...">
+            <div id="tags-suggestions" class="tags-suggestions hidden"></div>
+        </div>
+
+        <!-- Recurring Task Options -->
+        <div class="recurring-container hidden" id="recurring-container">
+            <label>
+                <input type="checkbox" id="recurring-enabled"> Tarea Recurrente
+            </label>
+            <select id="recurring-frequency" class="hidden">
+                <option value="daily">Diaria</option>
+                <option value="weekly">Semanal</option>
+                <option value="monthly">Mensual</option>
+            </select>
+        </div>
+
+        <!-- Filters -->
         <div class="contenedor-filtros">
             <button class="btn-filtro activo" data-filter="todo">Todo</button>
             <button class="btn-filtro" data-filter="pendiente">Pendiente</button>
             <button class="btn-filtro" data-filter="completado">Completado</button>
             <button class="btn-filtro" data-filter="urgente">Urgente</button>
+            <button class="btn-filtro" data-filter="high">Alta Prioridad</button>
         </div>
+
+        <!-- Sort Options -->
+        <div class="sort-container">
+            <label>Ordenar por:</label>
+            <select id="sort-selector">
+                <option value="manual">Manual</option>
+                <option value="date">Fecha</option>
+                <option value="priority">Prioridad</option>
+                <option value="category">Categoría</option>
+                <option value="created">Creación</option>
+            </select>
+        </div>
+
+        <!-- Task List -->
         <ul id="lista-tareas"></ul>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button id="export-json" class="btn-action">💾 Exportar JSON</button>
+            <button id="export-csv" class="btn-action">📄 Exportar CSV</button>
+            <button id="import-tasks" class="btn-action">📥 Importar</button>
+            <button id="clear-completed" class="btn-action">🗑️ Limpiar Completadas</button>
+        </div>
     </div>
+
+    <!-- Calendar Modal -->
+    <div id="calendar-modal" class="modal hidden">
+        <div class="modal-content calendar-content">
+            <div class="modal-header">
+                <h2>📅 Vista de Calendario</h2>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="calendar-controls">
+                <button id="prev-month">◀</button>
+                <span id="current-month">Diciembre 2025</span>
+                <button id="next-month">▶</button>
+            </div>
+            <div id="calendar-grid" class="calendar-grid"></div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Configuración</h2>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="enable-notifications"> Habilitar Notificaciones
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label>
+                        Notificar antes de:
+                        <select id="notification-timing">
+                            <option value="0">Al vencer</option>
+                            <option value="15">15 minutos</option>
+                            <option value="30">30 minutos</option>
+                            <option value="60">1 hora</option>
+                            <option value="1440">1 día</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="enable-sounds"> Sonidos de Celebración
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="enable-confetti" checked> Confetti al Completar
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <button id="backup-data" class="btn-setting">💾 Respaldar Datos</button>
+                    <button id="restore-data" class="btn-setting">📥 Restaurar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div id="task-detail-modal" class="modal hidden">
+        <div class="modal-content task-detail-content">
+            <div class="modal-header">
+                <h2>📋 Detalles de Tarea</h2>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="task-detail-body">
+                <div class="detail-section">
+                    <label>Notas:</label>
+                    <textarea id="task-notes" placeholder="Agregar notas o descripción..."></textarea>
+                </div>
+                <div class="detail-section">
+                    <label>Subtareas:</label>
+                    <div class="subtasks-container">
+                        <div class="subtask-input-container">
+                            <input type="text" id="subtask-input" placeholder="Agregar subtarea...">
+                            <button id="add-subtask">➕</button>
+                        </div>
+                        <div id="subtasks-list"></div>
+                        <div class="subtask-progress">
+                            <div class="progress-bar">
+                                <div id="subtask-progress-fill" class="progress-fill"></div>
+                            </div>
+                            <span id="subtask-progress-text">0%</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="save-task-details" class="btn-save-details">💾 Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔗 Compartir Tarea</h2>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="share-content">
+                <div class="share-link">
+                    <input type="text" id="share-link-input" readonly>
+                    <button id="copy-link">📋 Copiar</button>
+                </div>
+                <div class="qr-code-container">
+                    <canvas id="qr-code"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="file-input" accept=".json" style="display: none;">
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
